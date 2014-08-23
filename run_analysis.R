@@ -31,6 +31,8 @@ getColName <- function(path="./UCI HAR Dataset/features.txt") {
 #merge test and traing set
 getData <- function() {
     df <- rbind(getDataSet("test"),getDataSet("train"))
+    # write.table(df, file="data.txt",row.name=FALSE)
+    # print("File exported : ./data.txt")
     return(df)
 }
 
@@ -39,6 +41,11 @@ getDataSet <- function(type=character()) {
         stop(paste("there's no type of","\"",type,"\""))
     }
     col <- getColName()
+    col$colsName <- as.character(col$colsName)
+    for (i in 1:length(col$colsName)) {
+        col$colsName[i] <- labelToDesc(col$colsName[i])
+    }
+    
     filename <- c(paste("./UCI HAR Dataset/",type,"/X_",type,".txt",sep=""),
                   paste("./UCI HAR Dataset/",type,"/y_",type,".txt",sep=""),
                   paste("./UCI HAR Dataset/",type,"/subject_",type,".txt",sep="")
@@ -57,34 +64,39 @@ getDataSet <- function(type=character()) {
     df <- as.data.frame(cbind(y_Labeled,s,x))
     colnames(df) <- c("Activity","Subject",as.character(col$colsName))
     df <- melt(df,id=c("Activity","Subject"))
-    df[,3] <- labelToDesc(as.character(df[,3]))
-    write.table(df, file="data.txt",row.name=FALSE)
-    print("File exported : ./data.txt")
+    df[,3] <- as.character(df[,3])
     return(df)
 }
 
 labelToDesc <- function(l) {
-    
-    if (substr(l,1,1) == "t") { fft <- " | Time" } 
-    else if (substr(l,1,1) == "f") { fft <- " | Fast Fourie Transform applied" }
-    else { fft <- "" }
 
-    if (substr(l,nchar(l),nchar(l)) == "X") { axis <- " X-axis" }
-    else if (substr(l,nchar(l),nchar(l)) == "Y") { axis <- " Y-axis" }
-    else if (substr(l,nchar(l),nchar(l)) == "Z") { axis <- " Z-axis" }
-    else { axis <- "" }
+    ifelse(substr(l,1,1) == "t",fft <- " | Time",
+            ifelse(substr(l,1,1) == "f",fft <- " | Fast Fourie Transform applied",
+                   fft <- "")
+    )
+            
+    ifelse(substr(l,nchar(l),nchar(l)) == "X", axis <- " X-axis",
+           ifelse(substr(l,nchar(l),nchar(l)) == "Y",axis <- " Y-axis",
+                  ifelse(substr(l,nchar(l),nchar(l)) == "Z",axis <- " Z-axis",
+                         axis <- "")
+           )
+    )
     
-    if (grepl("*BodyAcc*",l) == TRUE) { type <- "Body Acceleration" }
-    else if (grepl("*GravityAcc",l) == TRUE) { type <- "Gravity Acceleration" }
-    else if (grepl("*BodyGyro*",l) == TRUE) { type <- "Body Gryo" }
-    else { type <- "" }
     
-    if (grepl("*mean\\(\\)*",l) == TRUE) { cal <- "Mean of "} 
-    else if (grepl("*std\\(\\)*",l) == TRUE) { cal <- "Standard Derivative of " }
-    else { cal <- "" }
+    ifelse(grepl("*BodyAcc*",l) == TRUE, type <- "Body Acceleration",
+           ifelse(grepl("*GravityAcc",l) == TRUE, type <- "Gravity Acceleration",
+                  ifelse(grepl("*BodyGyro*",l) == TRUE, type <- "Body Gryo",
+                         type <- "")
+           )
+    )
     
-    if (grepl("*Jerk*",l) == TRUE) { jerk <- " Jerk signal" } else { jerk <- "" }
-    if (grepl("*Mag*",l) == TRUE) { mag <- " Eucleadian norm" } else { mag <- "" }
+    ifelse(grepl("*mean\\(\\)*",l) == TRUE, cal <- "Mean of ",
+           ifelse(grepl("*std\\(\\)*",l) == TRUE, cal <- "Standard Derivative of ",
+                  cal <- "")
+    )
+    
+    ifelse(grepl("*Jerk*",l) == TRUE, jerk <- " Jerk signal",jerk <- "")
+    ifelse(grepl("*Mag*",l) == TRUE, mag <- " Euclidean norm", mag <- "")
     
     return(paste(cal, type, jerk, mag, axis, fft, sep = ""))
 }

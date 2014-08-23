@@ -31,8 +31,8 @@ getColName <- function(path="./UCI HAR Dataset/features.txt") {
 #merge test and traing set
 getData <- function() {
     df <- rbind(getDataSet("test"),getDataSet("train"))
-    # write.table(df, file="data.txt",row.name=FALSE)
-    # print("File exported : ./data.txt")
+    write.table(df, file="data.txt",row.name=FALSE)
+    print("File exported : ./data.txt")
     return(df)
 }
 
@@ -64,7 +64,6 @@ getDataSet <- function(type=character()) {
     df <- as.data.frame(cbind(y_Labeled,s,x))
     colnames(df) <- c("Activity","Subject",as.character(col$colsName))
     df <- melt(df,id=c("Activity","Subject"))
-    df[,3] <- as.character(df[,3])
     return(df)
 }
 

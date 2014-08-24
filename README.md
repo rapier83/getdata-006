@@ -1,4 +1,4 @@
-# Gettign and Cleaning Data Course Project
+# Getting and Cleaning Data Course Project
 
 this script code is consist of below functions. When you use code in **R** type `x <- getData()` and it check files. if there's no file or folder it download and unzip to original folder(UCI HAR Dataset). this code use that dataset folder name
 
